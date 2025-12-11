@@ -1,0 +1,27 @@
+{
+  "name": "epi-detection-app",
+  "version": "1.0.0",
+  "description": "Aplicação web para detecção de EPIs em tempo real usando YOLOv8",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Build completed'",
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "epi",
+    "ppe",
+    "detection",
+    "yolo",
+    "roboflow",
+    "computer-vision"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.7",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vercel/node": "^3.0.0"
+  }
+}

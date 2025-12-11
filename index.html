@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detecção de EPIs - Câmera</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Detecção de EPIs</h1>
+            <p class="subtitle">Verificação de Equipamentos de Proteção Individual em tempo real</p>
+        </header>
+
+        <main>
+            <!-- Seção de Configuração de EPIs Obrigatórios -->
+            <div class="config-section">
+                <div class="config-header">
+                    <h2>⚙️ Configurar EPIs Obrigatórios</h2>
+                    <button id="toggleConfig" class="btn btn-config">
+                        ⚙️ Configurar
+                    </button>
+                </div>
+                <div id="configPanel" class="config-panel" style="display: none;">
+                    <p class="config-description">Selecione quais EPIs são obrigatórios para sua verificação:</p>
+                    <div id="epiCheckboxes" class="epi-checkboxes">
+                        <!-- Checkboxes serão gerados dinamicamente -->
+                    </div>
+                    <div class="config-actions">
+                        <button id="saveConfig" class="btn btn-primary">
+                            💾 Salvar Configuração
+                        </button>
+                        <button id="selectAll" class="btn btn-secondary">
+                            ✅ Selecionar Todos
+                        </button>
+                        <button id="deselectAll" class="btn btn-secondary">
+                            ❌ Desmarcar Todos
+                        </button>
+                    </div>
+                    <div id="configStatus" class="config-status"></div>
+                </div>
+            </div>
+
+            <div class="camera-section">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+                
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-primary">
+                        ▶️ Iniciar Câmera
+                    </button>
+                    <button id="stopBtn" class="btn btn-secondary" disabled>
+                        ⏹️ Parar Câmera
+                    </button>
+                    <button id="captureBtn" class="btn btn-success" disabled>
+                        📸 Capturar e Analisar
+                    </button>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>Resultados da Detecção</h2>
+                <div id="status" class="status-box">
+                    <p>⏳ Aguardando análise...</p>
+                </div>
+                
+                <div id="results" class="results-box">
+                    <!-- Resultados serão inseridos aqui -->
+                </div>
+
+                <div id="epiStatus" class="epi-status">
+                    <!-- Status dos EPIs será exibido aqui -->
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Projeto de Detecção de EPIs - YOLOv8 | Roboflow</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
