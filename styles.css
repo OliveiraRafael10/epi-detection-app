@@ -5,10 +5,11 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f7fa;
     min-height: 100vh;
     padding: 20px;
+    color: #2c3e50;
 }
 
 .container {
@@ -18,26 +19,31 @@ body {
 
 header {
     text-align: center;
-    color: white;
-    margin-bottom: 30px;
+    color: #2c3e50;
+    margin-bottom: 40px;
+    padding: 30px 0;
 }
 
 header h1 {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
+    font-weight: 700;
     margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    color: #1a252f;
+    letter-spacing: -0.5px;
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: 400;
 }
 
 main {
     background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
 }
 
 .camera-section {
@@ -48,11 +54,12 @@ video {
     width: 100%;
     max-width: 640px;
     height: auto;
-    border-radius: 15px;
+    border-radius: 8px;
     background: #000;
     display: block;
     margin: 0 auto 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 2px solid #e5e7eb;
 }
 
 .controls {
@@ -84,18 +91,30 @@ video {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb;
     color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #1d4ed8;
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: #6b7280;
     color: white;
 }
 
+.btn-secondary:hover:not(:disabled) {
+    background: #4b5563;
+}
+
 .btn-success {
-    background: #28a745;
+    background: #10b981;
     color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #059669;
 }
 
 .results-section {
@@ -103,34 +122,37 @@ video {
 }
 
 .results-section h2 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 1.8rem;
+    color: #1a252f;
+    margin-bottom: 24px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 12px;
 }
 
 .status-box {
     background: #f8f9fa;
-    border-left: 4px solid #667eea;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    border-left: 4px solid #2563eb;
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin-bottom: 24px;
     transition: all 0.3s ease;
     animation: slideIn 0.3s ease;
 }
 
 .status-box.success {
-    background: #d4edda;
-    border-left-color: #28a745;
+    background: #ecfdf5;
+    border-left-color: #10b981;
 }
 
 .status-box.warning {
-    background: #fff3cd;
-    border-left-color: #ffc107;
+    background: #fffbeb;
+    border-left-color: #f59e0b;
 }
 
 .status-box.error {
-    background: #f8d7da;
-    border-left-color: #dc3545;
+    background: #fef2f2;
+    border-left-color: #ef4444;
 }
 
 @keyframes slideIn {
@@ -160,11 +182,12 @@ video {
 
 .epi-item {
     background: white;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border-left: 4px solid #28a745;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #10b981;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
 }
 
 .epi-item.detected {
@@ -178,9 +201,10 @@ video {
 }
 
 .epi-item h3 {
-    color: #333;
+    color: #1a252f;
     margin-bottom: 8px;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .epi-item .confidence {
@@ -189,26 +213,28 @@ video {
 }
 
 .epi-status {
-    background: #fff3cd;
-    border: 2px solid #ffc107;
-    border-radius: 8px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 6px;
     padding: 20px;
     margin-top: 20px;
 }
 
 .epi-status.warning {
-    background: #f8d7da;
-    border-color: #dc3545;
+    background: #fef2f2;
+    border-color: #fca5a5;
 }
 
 .epi-status.success {
-    background: #d4edda;
-    border-color: #28a745;
+    background: #ecfdf5;
+    border-color: #86efac;
 }
 
 .epi-status h3 {
-    color: #333;
-    margin-bottom: 10px;
+    color: #1a252f;
+    margin-bottom: 12px;
+    font-size: 1.125rem;
+    font-weight: 600;
 }
 
 .epi-status ul {
@@ -223,9 +249,10 @@ video {
 
 footer {
     text-align: center;
-    color: white;
-    margin-top: 30px;
-    opacity: 0.8;
+    color: #6c757d;
+    margin-top: 40px;
+    padding: 20px 0;
+    font-size: 0.875rem;
 }
 
 .loading {
@@ -260,8 +287,9 @@ footer {
 
 .config-header h2 {
     margin: 0;
-    color: #333;
-    font-size: 1.5rem;
+    color: #1a252f;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
 .btn-config {
@@ -404,13 +432,21 @@ footer {
 
 /* Novos botões */
 .btn-info {
-    background: #17a2b8;
+    background: #0ea5e9;
     color: white;
 }
 
+.btn-info:hover:not(:disabled) {
+    background: #0284c7;
+}
+
 .btn-warning {
-    background: #ffc107;
-    color: #333;
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background: #d97706;
 }
 
 .btn-sm {
@@ -437,9 +473,10 @@ footer {
 }
 
 .stats-section h3 {
-    margin: 0 0 15px 0;
-    color: #333;
-    font-size: 1.3rem;
+    margin: 0 0 20px 0;
+    color: #1a252f;
+    font-size: 1.125rem;
+    font-weight: 600;
 }
 
 .stats-display {
@@ -495,8 +532,9 @@ footer {
 
 .history-header h3 {
     margin: 0;
-    color: #333;
-    font-size: 1.3rem;
+    color: #1a252f;
+    font-size: 1.125rem;
+    font-weight: 600;
 }
 
 .history-display {
@@ -555,13 +593,14 @@ footer {
 
 .required-badge {
     display: inline-block;
-    background: #ffc107;
-    color: #333;
-    padding: 2px 8px;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 3px 10px;
     border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
+    font-size: 0.75rem;
+    font-weight: 600;
     margin-left: 8px;
+    border: 1px solid #fcd34d;
 }
 
 .stats-info {

@@ -132,12 +132,12 @@ toggleConfigBtn.addEventListener('click', () => {
 saveConfigBtn.addEventListener('click', () => {
     const selected = getSelectedEPIs();
     if (selected.length === 0) {
-        configStatus.innerHTML = '<p style="color: #dc3545;">⚠️ Selecione pelo menos um EPI obrigatório!</p>';
+        configStatus.innerHTML = '<p style="color: #dc3545;">Selecione pelo menos um EPI obrigatório!</p>';
         return;
     }
     
     saveRequiredEPIs(selected);
-    configStatus.innerHTML = `<p style="color: #28a745;">✅ Configuração salva! ${selected.length} EPI(s) obrigatório(s) configurado(s).</p>`;
+    configStatus.innerHTML = `<p style="color: #28a745;">Configuração salva! ${selected.length} EPI(s) obrigatório(s) configurado(s).</p>`;
     
     // Fechar painel após salvar
     setTimeout(() => {
@@ -230,7 +230,7 @@ function updateHistoryDisplay() {
             <div class="history-item ${entry.isCompliant ? 'compliant' : 'non-compliant'}">
                 <div class="history-time">${dateStr} ${timeStr}</div>
                 <div class="history-status">
-                    ${entry.isCompliant ? '✅ Conforme' : '⚠️ Não Conforme'}
+                    ${entry.isCompliant ? 'Conforme' : 'Não Conforme'}
                 </div>
                 <div class="history-details">
                     Detectados: ${entry.detectedEPIs.length} | 
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Mostrar EPIs obrigatórios atuais
     if (EPIS_OBRIGATORIOS.length > 0) {
-        updateStatus(`📋 EPIs obrigatórios configurados: ${EPIS_OBRIGATORIOS.join(', ')}`);
+        updateStatus(`EPIs obrigatórios configurados: ${EPIS_OBRIGATORIOS.join(', ')}`);
     }
     
     // Inicializar overlay do vídeo
@@ -272,16 +272,16 @@ document.addEventListener('DOMContentLoaded', () => {
         autoDetectBtn.addEventListener('click', () => {
             if (!isAutoDetecting) {
                 startAutoDetect(3); // A cada 3 segundos
-                autoDetectBtn.textContent = '⏸️ Parar Detecção';
+                autoDetectBtn.textContent = 'Parar Detecção';
                 autoDetectBtn.classList.add('active');
                 isAutoDetecting = true;
-                updateStatus('🔄 Modo de detecção contínua ativado (a cada 3 segundos)');
+                updateStatus('Modo de detecção contínua ativado (a cada 3 segundos)');
             } else {
                 stopAutoDetect();
-                autoDetectBtn.textContent = '🔄 Detecção Contínua';
+                autoDetectBtn.textContent = 'Detecção Contínua';
                 autoDetectBtn.classList.remove('active');
                 isAutoDetecting = false;
-                updateStatus('⏸️ Detecção contínua desativada');
+                updateStatus('Detecção contínua desativada');
             }
         });
     }
@@ -349,10 +349,10 @@ startBtn.addEventListener('click', async () => {
         const autoDetectBtn = document.getElementById('autoDetectBtn');
         if (autoDetectBtn) autoDetectBtn.disabled = false;
         
-        updateStatus('✅ Câmera ativada! Clique em "Capturar e Analisar" para detectar EPIs.');
+        updateStatus('Câmera ativada! Clique em "Capturar e Analisar" para detectar EPIs.');
     } catch (error) {
         console.error('Erro ao acessar câmera:', error);
-        updateStatus('❌ Erro ao acessar a câmera. Verifique as permissões.');
+        updateStatus('Erro ao acessar a câmera. Verifique as permissões.');
         alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.');
     }
 });
@@ -371,7 +371,7 @@ stopBtn.addEventListener('click', () => {
     stopBtn.disabled = true;
     captureBtn.disabled = true;
     
-    updateStatus('⏳ Câmera desativada.');
+    updateStatus('Câmera desativada.');
     clearResults();
 });
 
@@ -395,10 +395,10 @@ function displayResults(data) {
     
     if (!data.predictions || data.predictions.length === 0) {
         resultsBox.innerHTML = '<p>Nenhum EPI detectado nesta imagem.</p>';
-        updateStatus('⚠️ Nenhum EPI foi detectado.');
+        updateStatus('Nenhum EPI foi detectado.');
         epiStatusBox.className = 'epi-status warning';
         epiStatusBox.innerHTML = `
-            <h3>⚠️ Atenção!</h3>
+            <h3>Atenção</h3>
             <p>Nenhum EPI foi detectado. Certifique-se de estar usando os equipamentos corretos.</p>
         `;
         
@@ -439,7 +439,7 @@ function displayResults(data) {
         const epiItem = document.createElement('div');
         epiItem.className = `epi-item detected ${isRequired ? 'required' : ''}`;
         epiItem.innerHTML = `
-            <h3>✅ ${epi.toUpperCase()} ${isRequired ? '<span class="required-badge">OBRIGATÓRIO</span>' : ''}</h3>
+            <h3>${epi.toUpperCase()} ${isRequired ? '<span class="required-badge">OBRIGATÓRIO</span>' : ''}</h3>
             <p class="confidence">Confiança: ${confidence}% | Detecções: ${detection.count}</p>
         `;
         resultsBox.appendChild(epiItem);
@@ -449,10 +449,10 @@ function displayResults(data) {
     const missingEPIs = EPIS_OBRIGATORIOS.filter(epi => !detectedEPIs.includes(epi));
     
     if (missingEPIs.length === 0) {
-        updateStatus('✅ Todos os EPIs obrigatórios foram detectados!');
+        updateStatus('Todos os EPIs obrigatórios foram detectados!');
         epiStatusBox.className = 'epi-status success';
         epiStatusBox.innerHTML = `
-            <h3>✅ Conformidade Total</h3>
+            <h3>Conformidade Total</h3>
             <p>Todos os EPIs obrigatórios foram detectados corretamente.</p>
             <p class="stats-info">Total de detecções: ${data.predictions.length}</p>
         `;
@@ -460,12 +460,12 @@ function displayResults(data) {
         // Notificação visual/sonora de sucesso
         playNotificationSound('success');
     } else {
-        updateStatus(`⚠️ Faltando ${missingEPIs.length} EPI(s) obrigatório(s).`);
+        updateStatus(`Faltando ${missingEPIs.length} EPI(s) obrigatório(s).`);
         epiStatusBox.className = 'epi-status warning';
         epiStatusBox.innerHTML = `
-            <h3>⚠️ EPIs Faltando</h3>
+            <h3>EPIs Faltando</h3>
             <ul>
-                ${missingEPIs.map(epi => `<li>❌ ${epi.toUpperCase()}</li>`).join('')}
+                ${missingEPIs.map(epi => `<li>${epi.toUpperCase()}</li>`).join('')}
             </ul>
             <p>Por favor, utilize todos os equipamentos obrigatórios.</p>
             <p class="stats-info">Total de detecções: ${data.predictions.length}</p>
@@ -713,7 +713,7 @@ function generateMockData() {
 // ========== FUNÇÃO PRINCIPAL DE CAPTURA ==========
 async function captureAndAnalyze(useMock = false) {
     if (!stream || !video.videoWidth) {
-        updateStatus('❌ Câmera não está pronta.');
+        updateStatus('Câmera não está pronta.');
         return;
     }
     
@@ -723,7 +723,7 @@ async function captureAndAnalyze(useMock = false) {
     
     isDetecting = true;
     captureBtn.disabled = true;
-    updateStatus('🔍 Analisando imagem...');
+    updateStatus('Analisando imagem...');
     
     try {
         let data;
@@ -763,7 +763,7 @@ async function captureAndAnalyze(useMock = false) {
         
     } catch (error) {
         console.error('Erro ao processar imagem:', error);
-        updateStatus(`❌ Erro ao processar imagem: ${error.message}`);
+        updateStatus(`Erro ao processar imagem: ${error.message}`);
         
         // Em caso de erro, oferecer modo de teste
         if (!useMock && error.message.includes('API')) {
