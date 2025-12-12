@@ -114,6 +114,34 @@ video {
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease;
+}
+
+.status-box.success {
+    background: #d4edda;
+    border-left-color: #28a745;
+}
+
+.status-box.warning {
+    background: #fff3cd;
+    border-left-color: #ffc107;
+}
+
+.status-box.error {
+    background: #f8d7da;
+    border-left-color: #dc3545;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .status-box p {
@@ -349,5 +377,216 @@ footer {
     
     .config-actions .btn {
         width: 100%;
+    }
+}
+
+/* ========== ESTILOS PARA NOVAS FUNCIONALIDADES ========== */
+
+/* Container de vídeo com overlay */
+.video-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto 20px;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    border-radius: 15px;
+    z-index: 10;
+}
+
+/* Novos botões */
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn.active {
+    background: #dc3545;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Estatísticas */
+.stats-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.stats-section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.stats-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+    display: block;
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-value.success {
+    color: #28a745;
+}
+
+.stat-value.warning {
+    color: #dc3545;
+}
+
+/* Histórico */
+.history-section {
+    margin-top: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.history-header h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.history-display {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-item {
+    background: white;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #6c757d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.history-item.compliant {
+    border-left-color: #28a745;
+    background: #d4edda;
+}
+
+.history-item.non-compliant {
+    border-left-color: #dc3545;
+    background: #f8d7da;
+}
+
+.history-time {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.history-status {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.history-details {
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.empty-history {
+    text-align: center;
+    color: #6c757d;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* EPI Item melhorado */
+.epi-item.required {
+    border-left-width: 6px;
+}
+
+.required-badge {
+    display: inline-block;
+    background: #ffc107;
+    color: #333;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+.stats-info {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Melhorias de responsividade */
+@media (max-width: 768px) {
+    .stats-display {
+        grid-template-columns: 1fr;
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+    
+    .controls .btn {
+        width: 100%;
+    }
+    
+    .history-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
     }
 }

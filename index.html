@@ -43,7 +43,10 @@
             </div>
 
             <div class="camera-section">
-                <video id="video" autoplay playsinline></video>
+                <div class="video-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="videoOverlay" class="video-overlay"></canvas>
+                </div>
                 <canvas id="canvas" style="display: none;"></canvas>
                 
                 <div class="controls">
@@ -56,11 +59,29 @@
                     <button id="captureBtn" class="btn btn-success" disabled>
                         📸 Capturar e Analisar
                     </button>
+                    <button id="autoDetectBtn" class="btn btn-info" disabled>
+                        🔄 Detecção Contínua
+                    </button>
+                    <button id="testModeBtn" class="btn btn-warning">
+                        🧪 Modo Teste
+                    </button>
                 </div>
             </div>
 
             <div class="results-section">
                 <h2>Resultados da Detecção</h2>
+                
+                <!-- Estatísticas -->
+                <div class="stats-section">
+                    <h3>📊 Estatísticas</h3>
+                    <div id="statsDisplay" class="stats-display">
+                        <div class="stat-item">
+                            <span class="stat-label">Total de Análises:</span>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="status" class="status-box">
                     <p>⏳ Aguardando análise...</p>
                 </div>
@@ -72,11 +93,24 @@
                 <div id="epiStatus" class="epi-status">
                     <!-- Status dos EPIs será exibido aqui -->
                 </div>
+                
+                <!-- Histórico de Detecções -->
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>📜 Histórico de Detecções</h3>
+                        <button id="clearHistoryBtn" class="btn btn-sm btn-secondary">
+                            🗑️ Limpar
+                        </button>
+                    </div>
+                    <div id="historyDisplay" class="history-display">
+                        <!-- Histórico será inserido aqui -->
+                    </div>
+                </div>
             </div>
         </main>
 
         <footer>
-            <p>Projeto de Detecção de EPIs - YOLOv8 | Roboflow</p>
+            <p>Projeto de Detecção de EPIs - YOLOv11 | Roboflow</p>
         </footer>
     </div>
 
