@@ -4,5 +4,6 @@
       "source": "/api/detect",
       "destination": "/api/detect.js"
     }
-  ]
+  ],
+  "cleanUrls": true
 }

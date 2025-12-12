@@ -1,9 +1,8 @@
 // Configuração da API
 // Para produção no Vercel, a URL será automaticamente /api/detect
-// Para desenvolvimento local com Vercel CLI: const API_URL = 'http://localhost:3000/api/detect';
-const API_URL = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:3000/api/detect'
-    : '/api/detect';
+// Para desenvolvimento local com Vercel CLI, descomente a linha abaixo e comente a linha de produção
+// const API_URL = 'http://localhost:3000/api/detect';
+const API_URL = '/api/detect';
 
 // Classes de EPIs (ajuste conforme seu modelo treinado)
 const EPI_CLASSES = {

@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Aplicação web para detecção de EPIs em tempo real usando YOLOv8",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Build completed'",
-    "start": "vercel dev"
+    "dev": "vercel dev"
   },
   "keywords": [
     "epi",
