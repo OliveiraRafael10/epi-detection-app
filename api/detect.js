@@ -79,6 +79,7 @@ module.exports = async (req, res) => {
         });
 
         // URL da API do Roboflow
+        // Formato: https://detect.roboflow.com/{workspace}/{model_id}?api_key={api_key}
         const roboflowUrl = `https://detect.roboflow.com/${ROBOTFLOW_WORKSPACE}/${ROBOTFLOW_MODEL_ID}?api_key=${ROBOTFLOW_API_KEY}`;
 
         // Enviar para Roboflow
