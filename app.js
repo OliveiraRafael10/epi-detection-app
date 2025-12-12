@@ -48,6 +48,7 @@ const canvas = document.getElementById('canvas');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const captureBtn = document.getElementById('captureBtn');
+const resumeBtn = document.getElementById('resumeBtn');
 const statusBox = document.getElementById('status');
 const resultsBox = document.getElementById('results');
 const epiStatusBox = document.getElementById('epiStatus');
@@ -66,6 +67,8 @@ let isDetecting = false;
 let autoDetectInterval = null;
 let detectionHistory = loadDetectionHistory();
 let stats = loadStats();
+let isImageFrozen = false;
+let frozenImageData = null;
 
 // Funções de gerenciamento de configuração
 function loadRequiredEPIs() {
@@ -362,6 +365,7 @@ startBtn.addEventListener('click', async () => {
 // Parar câmera
 stopBtn.addEventListener('click', () => {
     stopAutoDetect();
+    resumeVideo(); // Retomar vídeo se estiver congelado
     
     if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -373,14 +377,34 @@ stopBtn.addEventListener('click', () => {
     stopBtn.disabled = true;
     captureBtn.disabled = true;
     
+    const autoDetectBtn = document.getElementById('autoDetectBtn');
+    if (autoDetectBtn) autoDetectBtn.disabled = true;
+    
     updateStatus('Câmera desativada.');
     clearResults();
 });
 
 // Capturar e analisar (botão manual)
 captureBtn.addEventListener('click', () => {
-    captureAndAnalyze(false);
+    // Se a imagem já estiver congelada, retomar o vídeo primeiro
+    if (isImageFrozen) {
+        resumeVideo();
+        if (resumeBtn) resumeBtn.style.display = 'none';
+        captureBtn.textContent = 'Capturar e Analisar';
+    } else {
+        captureAndAnalyze(false);
+    }
 });
+
+// Botão para retomar vídeo
+if (resumeBtn) {
+    resumeBtn.addEventListener('click', () => {
+        resumeVideo();
+        resumeBtn.style.display = 'none';
+        captureBtn.textContent = 'Capturar e Analisar';
+        captureBtn.disabled = false;
+    });
+}
 
 // Exibir resultados
 function displayResults(data) {
@@ -388,8 +412,12 @@ function displayResults(data) {
     epiStatusBox.innerHTML = '';
     epiStatusBox.className = 'epi-status';
     
-    // Atualizar overlay do vídeo com bounding boxes
-    if (data.predictions && data.predictions.length > 0) {
+    // Se não estiver em modo contínuo, congelar a imagem capturada
+    if (!autoDetectInterval && canvas && frozenImageData) {
+        // Desenhar a imagem congelada no canvas visível (overlay)
+        drawFrozenImage(frozenImageData, data.predictions || []);
+    } else if (data.predictions && data.predictions.length > 0) {
+        // Em modo contínuo, apenas atualizar overlay
         drawBoundingBoxes(data.predictions, video);
     } else {
         clearVideoOverlay();
@@ -497,6 +525,119 @@ function clearResults() {
     epiStatusBox.className = 'epi-status';
     // Limpar bounding boxes do vídeo
     clearVideoOverlay();
+    // Limpar imagem congelada
+    resumeVideo();
+}
+
+// Retomar vídeo (descongelar imagem)
+function resumeVideo() {
+    if (isImageFrozen) {
+        const overlay = document.getElementById('videoOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('frozen');
+        }
+        video.style.opacity = '1';
+        
+        if (stream && video.paused) {
+            video.play();
+        }
+        isImageFrozen = false;
+        frozenImageData = null;
+    }
+}
+
+// Desenhar imagem congelada com bounding boxes
+function drawFrozenImage(frozenData, predictions) {
+    const overlay = document.getElementById('videoOverlay');
+    const videoContainer = document.querySelector('.video-container');
+    if (!overlay || !frozenData || !videoContainer) return;
+    
+    // Ocultar vídeo e mostrar overlay
+    video.style.opacity = '0';
+    
+    // Configurar overlay com tamanho correto
+    overlay.width = frozenData.width;
+    overlay.height = frozenData.height;
+    overlay.style.display = 'block';
+    overlay.classList.add('frozen');
+    
+    // Ajustar estilo do overlay para cobrir o vídeo
+    overlay.style.width = '100%';
+    overlay.style.height = 'auto';
+    overlay.style.maxWidth = '640px';
+    
+    const ctx = overlay.getContext('2d');
+    
+    // Desenhar a imagem congelada como fundo
+    const img = new Image();
+    img.onload = () => {
+        ctx.drawImage(img, 0, 0, overlay.width, overlay.height);
+        
+        // Desenhar bounding boxes sobre a imagem
+        if (predictions && predictions.length > 0) {
+            predictions.forEach(pred => {
+                const className = EPI_CLASSES[pred.class] || `Classe ${pred.class}`;
+                const confidence = pred.confidence;
+                
+                // Coordenadas já estão no formato correto
+                const x = pred.x;
+                const y = pred.y;
+                const width = pred.width;
+                const height = pred.height;
+                
+                // Cores baseadas no tipo de EPI
+                const isRequired = EPIS_OBRIGATORIOS.includes(className);
+                const color = isRequired ? '#28a745' : '#667eea';
+                
+                // Desenhar retângulo
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 4;
+                ctx.strokeRect(x - width/2, y - height/2, width, height);
+                
+                // Desenhar label com fundo
+                ctx.fillStyle = color;
+                ctx.font = 'bold 16px Arial';
+                const label = `${className} ${(confidence * 100).toFixed(0)}%`;
+                const textWidth = ctx.measureText(label).width;
+                const labelHeight = 24;
+                const labelY = Math.max(labelHeight, y - height/2 - 5);
+                
+                ctx.fillRect(x - width/2, labelY - labelHeight, textWidth + 12, labelHeight);
+                ctx.fillStyle = 'white';
+                ctx.fillText(label, x - width/2 + 6, labelY - 6);
+            });
+        }
+    };
+    img.src = frozenData.imageData;
+}
+
+// Criar imagem mock para teste
+function createMockFrozenImage() {
+    // Criar um canvas temporário com uma imagem de exemplo
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 640;
+    tempCanvas.height = 480;
+    const ctx = tempCanvas.getContext('2d');
+    
+    // Desenhar fundo gradiente
+    const gradient = ctx.createLinearGradient(0, 0, 640, 480);
+    gradient.addColorStop(0, '#667eea');
+    gradient.addColorStop(1, '#764ba2');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 640, 480);
+    
+    // Adicionar texto
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Imagem de Teste', 320, 240);
+    
+    return {
+        width: 640,
+        height: 480,
+        imageData: tempCanvas.toDataURL('image/jpeg', 1.0)
+    };
 }
 
 // ========== FUNÇÕES DE HISTÓRICO ==========
@@ -627,6 +768,12 @@ function clearVideoOverlay() {
     if (overlay) {
         const ctx = overlay.getContext('2d');
         ctx.clearRect(0, 0, overlay.width, overlay.height);
+        // Se não estiver em modo congelado, ocultar overlay
+        if (!isImageFrozen) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('frozen');
+            video.style.opacity = '1';
+        }
     }
 }
 
@@ -748,10 +895,20 @@ async function captureAndAnalyze(useMock = false) {
     try {
         let data;
         
+        // Se não estiver em modo contínuo, pausar o vídeo e congelar a imagem
+        if (!autoDetectInterval) {
+            video.pause();
+            isImageFrozen = true;
+        }
+        
         if (useMock) {
             // Usar dados mock para teste
             await new Promise(resolve => setTimeout(resolve, 500)); // Simular delay
             data = generateMockData();
+            // Para mock, criar uma imagem simulada
+            if (!autoDetectInterval) {
+                frozenImageData = createMockFrozenImage();
+            }
         } else {
             // Capturar frame do vídeo
             canvas.width = video.videoWidth;
@@ -759,7 +916,16 @@ async function captureAndAnalyze(useMock = false) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0);
             
-            // Converter e comprimir
+            // Salvar a imagem capturada para exibição congelada
+            if (!autoDetectInterval) {
+                frozenImageData = {
+                    width: canvas.width,
+                    height: canvas.height,
+                    imageData: canvas.toDataURL('image/jpeg', 1.0)
+                };
+            }
+            
+            // Converter e comprimir para API
             const imageData = canvas.toDataURL('image/jpeg', 0.9);
             const compressedImage = await compressImage(imageData);
             
@@ -780,6 +946,12 @@ async function captureAndAnalyze(useMock = false) {
         }
         
         displayResults(data);
+        
+        // Se não estiver em modo contínuo, mostrar botão de retomar
+        if (!autoDetectInterval && resumeBtn) {
+            resumeBtn.style.display = 'inline-block';
+            captureBtn.textContent = 'Nova Captura';
+        }
         
     } catch (error) {
         console.error('Erro ao processar imagem:', error);
