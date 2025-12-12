@@ -265,26 +265,28 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStatsDisplay();
     updateHistoryDisplay();
     
-    // Botão de detecção contínua
-    const autoDetectBtn = document.getElementById('autoDetectBtn');
-    if (autoDetectBtn) {
-        let isAutoDetecting = false;
-        autoDetectBtn.addEventListener('click', () => {
-            if (!isAutoDetecting) {
-                startAutoDetect(3); // A cada 3 segundos
-                autoDetectBtn.textContent = 'Parar Detecção';
-                autoDetectBtn.classList.add('active');
-                isAutoDetecting = true;
-                updateStatus('Modo de detecção contínua ativado (a cada 3 segundos)');
-            } else {
-                stopAutoDetect();
-                autoDetectBtn.textContent = 'Detecção Contínua';
-                autoDetectBtn.classList.remove('active');
-                isAutoDetecting = false;
-                updateStatus('Detecção contínua desativada');
-            }
-        });
-    }
+     // Botão de detecção contínua
+     const autoDetectBtn = document.getElementById('autoDetectBtn');
+     if (autoDetectBtn) {
+         let isAutoDetecting = false;
+         let detectionInterval = 0.5; // Intervalo em segundos (0.5s = 2 FPS, muito rápido e fluido)
+         
+         autoDetectBtn.addEventListener('click', () => {
+             if (!isAutoDetecting) {
+                 startAutoDetect(detectionInterval); // Detecção muito rápida e contínua
+                 autoDetectBtn.textContent = 'Parar Detecção';
+                 autoDetectBtn.classList.add('active');
+                 isAutoDetecting = true;
+                 updateStatus(`🔴 Detecção contínua ativa (a cada ${detectionInterval}s) - ${(1/detectionInterval).toFixed(1)} análises/segundo`);
+             } else {
+                 stopAutoDetect();
+                 autoDetectBtn.textContent = 'Detecção Contínua';
+                 autoDetectBtn.classList.remove('active');
+                 isAutoDetecting = false;
+                 updateStatus('Detecção contínua desativada');
+             }
+         });
+     }
     
     // Botão de modo teste
     const testModeBtn = document.getElementById('testModeBtn');
@@ -629,16 +631,26 @@ function clearVideoOverlay() {
 }
 
 // ========== FUNÇÕES DE DETECÇÃO CONTÍNUA ==========
-function startAutoDetect(intervalSeconds = 3) {
+function startAutoDetect(intervalSeconds = 0.5) {
     if (autoDetectInterval) {
         clearInterval(autoDetectInterval);
     }
     
+    // Intervalo otimizado para detecção muito rápida e contínua
+    // Mínimo de 300ms para não sobrecarregar a API, mas permite até ~3 FPS
+    const intervalMs = Math.max(intervalSeconds * 1000, 300);
+    
+    // Executar primeira detecção imediatamente
+    if (stream && video.videoWidth && !isDetecting) {
+        captureAndAnalyze();
+    }
+    
+    // Continuar com intervalo
     autoDetectInterval = setInterval(() => {
         if (stream && video.videoWidth && !isDetecting) {
             captureAndAnalyze();
         }
-    }, intervalSeconds * 1000);
+    }, intervalMs);
 }
 
 function stopAutoDetect() {
@@ -646,6 +658,8 @@ function stopAutoDetect() {
         clearInterval(autoDetectInterval);
         autoDetectInterval = null;
     }
+    // Garantir que o botão de captura manual esteja habilitado
+    captureBtn.disabled = false;
 }
 
 // ========== FUNÇÕES DE COMPRESSÃO ==========
@@ -713,17 +727,23 @@ function generateMockData() {
 // ========== FUNÇÃO PRINCIPAL DE CAPTURA ==========
 async function captureAndAnalyze(useMock = false) {
     if (!stream || !video.videoWidth) {
-        updateStatus('Câmera não está pronta.');
+        if (!autoDetectInterval) { // Só mostrar erro se não estiver em modo contínuo
+            updateStatus('Câmera não está pronta.');
+        }
         return;
     }
     
     if (isDetecting) {
-        return;
+        return; // Já está processando, pula este frame
     }
     
     isDetecting = true;
-    captureBtn.disabled = true;
-    updateStatus('Analisando imagem...');
+    // Não desabilitar botão nem mostrar status em modo contínuo para performance
+    if (!autoDetectInterval) {
+        captureBtn.disabled = true;
+        updateStatus('Analisando imagem...');
+    }
+    // Em modo contínuo, não atualizar status para evitar flickering na UI
     
     try {
         let data;
@@ -775,6 +795,9 @@ async function captureAndAnalyze(useMock = false) {
         }
     } finally {
         isDetecting = false;
-        captureBtn.disabled = false;
+        // Reabilitar botão apenas se não estiver em modo contínuo
+        if (!autoDetectInterval) {
+            captureBtn.disabled = false;
+        }
     }
 }

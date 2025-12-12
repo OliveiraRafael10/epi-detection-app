@@ -122,3 +122,4 @@ vercel --prod
 ```
 
 Ou configure Git para deploy automático no Vercel.
+
