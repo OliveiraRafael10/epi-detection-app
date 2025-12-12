@@ -1,23 +1,29 @@
-# 🛡️ App Web - Detecção de EPIs
+# App Web - Detecção de EPIs
 
-Aplicação web para detecção de Equipamentos de Proteção Individual (EPIs) em tempo real usando câmera do celular e modelo YOLOv8 treinado no Roboflow.
+Aplicação web para detecção de Equipamentos de Proteção Individual (EPIs) em tempo real usando câmera do dispositivo e modelo YOLOv11 treinado no Roboflow.
 
-## 📋 Funcionalidades
+## Sobre o Projeto
 
-- ✅ Acesso à câmera do celular via navegador
-- ✅ Detecção de EPIs em tempo real
-- ✅ Verificação de conformidade (EPIs obrigatórios)
-- ✅ Interface responsiva e moderna
-- ✅ Deploy fácil no Vercel
+Este projeto permite verificar o uso correto de EPIs através de análise de imagens capturadas pela câmera. O sistema detecta equipamentos como capacete, óculos, máscara facial, luvas e colete de segurança, verificando se os EPIs obrigatórios configurados estão presentes.
 
-## 🚀 Como Usar Localmente
+## Funcionalidades
 
-### Pré-requisitos
+- Acesso à câmera via navegador
+- Detecção de EPIs em tempo real
+- Verificação de conformidade com EPIs obrigatórios
+- Modo de detecção contínua (análise automática)
+- Visualização de bounding boxes sobre os objetos detectados
+- Histórico de detecções com estatísticas
+- Modo de teste com dados simulados
+- Interface responsiva para dispositivos móveis
+
+## Pré-requisitos
 
 - Node.js instalado
 - Conta no Roboflow com modelo treinado
+- Navegador moderno com suporte a câmera (HTTPS necessário)
 
-### Instalação
+## Instalação Local
 
 1. Instale as dependências:
 ```bash
@@ -31,104 +37,61 @@ ROBOFLOW_MODEL_ID=seu_model_id_aqui
 ROBOFLOW_WORKSPACE=seu_workspace_aqui
 ```
 
-3. Para desenvolvimento local, você pode usar o Vercel CLI:
+3. Para desenvolvimento local com Vercel CLI:
 ```bash
 npm install -g vercel
 vercel dev
 ```
 
-Ou use um servidor simples:
+Ou use um servidor HTTP simples:
 ```bash
-# Python 3
 python -m http.server 8000
-
-# Node.js
-npx http-server
 ```
 
-## 🌐 Deploy no Vercel
+## Deploy no Vercel
 
-### Passo 1: Preparar o Projeto
-
-1. Certifique-se de que todos os arquivos estão na pasta `epi-detection-app`
-2. Verifique se o `package.json` está configurado corretamente
-
-### Passo 2: Conectar ao Vercel
-
-1. Instale o Vercel CLI (se ainda não tiver):
+1. Instale o Vercel CLI:
 ```bash
 npm install -g vercel
 ```
 
-2. Faça login no Vercel:
+2. Faça login e faça o deploy:
 ```bash
 vercel login
-```
-
-3. No diretório do projeto, execute:
-```bash
 vercel
 ```
 
-4. Siga as instruções no terminal
+3. Configure as variáveis de ambiente no painel do Vercel:
+   - Settings > Environment Variables
+   - Adicione: ROBOFLOW_API_KEY, ROBOFLOW_MODEL_ID, ROBOFLOW_WORKSPACE
 
-### Passo 3: Configurar Variáveis de Ambiente
+4. Obtenha as credenciais no Roboflow:
+   - Acesse Deploy > Roboflow API
+   - Copie API Key, Model ID e Workspace
 
-No painel do Vercel:
-
-1. Vá em **Settings** > **Environment Variables**
-2. Adicione as seguintes variáveis:
-   - `ROBOFLOW_API_KEY` - Sua API key do Roboflow
-   - `ROBOFLOW_MODEL_ID` - ID do seu modelo treinado
-   - `ROBOFLOW_WORKSPACE` - Nome do seu workspace no Roboflow
-
-### Passo 4: Obter Credenciais do Roboflow
-
-1. Acesse seu projeto no Roboflow
-2. Vá em **Deploy** > **Roboflow API**
-3. Copie:
-   - **API Key** → `ROBOFLOW_API_KEY`
-   - **Model ID** → `ROBOFLOW_MODEL_ID`
-   - **Workspace** → `ROBOFLOW_WORKSPACE`
-
-### Passo 5: Deploy
-
+5. Faça o deploy em produção:
 ```bash
 vercel --prod
 ```
 
-Ou faça push para o Git conectado ao Vercel (deploy automático).
+## Configuração das Classes
 
-## 📱 Como Usar no Celular
-
-1. Abra o navegador no seu celular
-2. Acesse a URL do seu app no Vercel
-3. Permita o acesso à câmera quando solicitado
-4. Clique em "Iniciar Câmera"
-5. Posicione-se na frente da câmera
-6. Clique em "Capturar e Analisar"
-7. Veja os resultados da detecção
-
-## 🔧 Configuração dos IDs das Classes
-
-No arquivo `app.js`, ajuste os IDs das classes conforme seu modelo:
+No arquivo `app.js`, ajuste os IDs das classes conforme seu modelo treinado:
 
 ```javascript
 const EPI_CLASSES = {
-    0: 'capacete',
-    1: 'colete_refletivo',
-    2: 'luvas',
-    3: 'mascara',
-    4: 'oculos'
+    0: 'pessoa',
+    10: 'capacete',
+    8: 'óculos',
+    5: 'máscara facial',
+    9: 'luvas',
+    16: 'colete de segurança'
 };
 ```
 
-Verifique os IDs corretos no Roboflow:
-1. Vá em **Annotate** > **Classes**
-2. Veja a ordem/número de cada classe
-3. Ajuste o objeto `EPI_CLASSES` conforme necessário
+Verifique os IDs corretos no Roboflow em Annotate > Classes.
 
-## 📂 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 epi-detection-app/
@@ -136,35 +99,44 @@ epi-detection-app/
 ├── styles.css          # Estilos CSS
 ├── app.js              # Lógica do frontend
 ├── api/
-│   ├── detect.js       # API endpoint (alternativa)
-│   └── detect-vercel.js # API endpoint (Vercel)
+│   └── detect.js       # API endpoint (Vercel Serverless)
 ├── package.json        # Dependências
 ├── vercel.json         # Configuração Vercel
-└── README.md           # Este arquivo
+└── README.md           # Documentação
 ```
 
-## 🐛 Troubleshooting
+## Uso
 
-### Erro: "Câmera não acessível"
+1. Acesse a aplicação no navegador
+2. Permita o acesso à câmera quando solicitado
+3. Clique em "Iniciar Câmera"
+4. Use "Capturar e Analisar" para análise manual ou "Detecção Contínua" para monitoramento automático
+5. Configure os EPIs obrigatórios no painel de configuração
+6. Visualize os resultados com bounding boxes sobre os objetos detectados
+
+## Solução de Problemas
+
+**Câmera não acessível:**
 - Verifique as permissões do navegador
-- Certifique-se de usar HTTPS (Vercel já fornece)
+- Certifique-se de usar HTTPS (Vercel fornece automaticamente)
 
-### Erro: "API Key não encontrada"
+**API Key não encontrada:**
 - Verifique se as variáveis de ambiente estão configuradas no Vercel
-- Certifique-se de que fez o redeploy após adicionar as variáveis
+- Faça redeploy após adicionar as variáveis
 
-### Detecções não aparecem
-- Verifique se os IDs das classes em `app.js` estão corretos
-- Confirme que o modelo está publicamente acessível no Roboflow
+**Detecções não aparecem:**
+- Verifique se os IDs das classes em app.js estão corretos
+- Confirme que o modelo está acessível no Roboflow
 - Verifique os logs do console do navegador (F12)
 
-## 📝 Notas
+## Notas Técnicas
 
-- O app usa HTTPS automaticamente no Vercel (necessário para acesso à câmera)
+- O app requer HTTPS para acesso à câmera (fornecido automaticamente pelo Vercel)
 - A câmera traseira é priorizada em dispositivos móveis
 - O modelo roda na API do Roboflow, não localmente
-- Para melhor performance, considere otimizar as imagens antes de enviar
+- As imagens são comprimidas antes do envio para otimizar performance
+- O histórico de detecções é armazenado no localStorage do navegador
 
-## 📄 Licença
+## Licença
 
 MIT
