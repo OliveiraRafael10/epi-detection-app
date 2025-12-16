@@ -354,6 +354,11 @@ startBtn.addEventListener('click', async () => {
         const autoDetectBtn = document.getElementById('autoDetectBtn');
         if (autoDetectBtn) autoDetectBtn.disabled = false;
         
+        // Garantir que vídeo esteja tocando
+        if (video.paused) {
+            video.play();
+        }
+        
         updateStatus('Câmera ativada! Clique em "Capturar e Analisar" para detectar EPIs.');
     } catch (error) {
         console.error('Erro ao acessar câmera:', error);
@@ -408,16 +413,28 @@ if (resumeBtn) {
 
 // Exibir resultados
 function displayResults(data) {
+    // Em modo contínuo, apenas atualizar overlay em tempo real
+    if (autoDetectInterval) {
+        // Modo contínuo: desenhar bounding boxes sobre o vídeo que continua rodando
+        if (data.predictions && data.predictions.length > 0) {
+            drawBoundingBoxes(data.predictions, video);
+        } else {
+            clearVideoOverlay();
+        }
+        // Em modo contínuo, atualizar apenas resultados (não limpar tudo)
+        updateResultsOnly(data);
+        return; // Retornar cedo no modo contínuo para não congelar
+    }
+    
+    // Modo manual: comportamento normal com imagem congelada
     resultsBox.innerHTML = '';
     epiStatusBox.innerHTML = '';
     epiStatusBox.className = 'epi-status';
     
-    // Se não estiver em modo contínuo, congelar a imagem capturada
-    if (!autoDetectInterval && canvas && frozenImageData) {
-        // Desenhar a imagem congelada no canvas visível (overlay)
+    // Congelar imagem apenas no modo manual
+    if (canvas && frozenImageData) {
         drawFrozenImage(frozenImageData, data.predictions || []);
     } else if (data.predictions && data.predictions.length > 0) {
-        // Em modo contínuo, apenas atualizar overlay
         drawBoundingBoxes(data.predictions, video);
     } else {
         clearVideoOverlay();
@@ -509,6 +526,60 @@ function displayResults(data) {
     addToHistory(data, detectedEPIs, missingEPIs);
     
     // Atualizar estatísticas e histórico na UI
+    updateStatsDisplay();
+    updateHistoryDisplay();
+}
+
+// Atualizar apenas resultados (para modo contínuo, sem limpar tudo)
+function updateResultsOnly(data) {
+    if (!data.predictions || data.predictions.length === 0) {
+        // Em modo contínuo, não limpar tudo, apenas atualizar status
+        return;
+    }
+    
+    // Agrupar detecções por classe
+    const detections = {};
+    data.predictions.forEach(pred => {
+        const classId = pred.class;
+        const className = EPI_CLASSES[classId] || `Classe ${classId}`;
+        
+        if (!detections[className]) {
+            detections[className] = {
+                count: 0,
+                maxConfidence: 0
+            };
+        }
+        
+        detections[className].count++;
+        detections[className].maxConfidence = Math.max(
+            detections[className].maxConfidence,
+            pred.confidence
+        );
+    });
+    
+    // Atualizar resultados sem limpar tudo
+    const detectedEPIs = Object.keys(detections);
+    const missingEPIs = EPIS_OBRIGATORIOS.filter(epi => !detectedEPIs.includes(epi));
+    
+    // Atualizar status box apenas se necessário
+    if (missingEPIs.length === 0) {
+        epiStatusBox.className = 'epi-status success';
+        epiStatusBox.innerHTML = `
+            <h3>✅ Conformidade</h3>
+            <p>Todos os EPIs obrigatórios detectados.</p>
+        `;
+    } else {
+        epiStatusBox.className = 'epi-status warning';
+        epiStatusBox.innerHTML = `
+            <h3>⚠️ Faltando ${missingEPIs.length} EPI(s)</h3>
+            <ul>
+                ${missingEPIs.map(epi => `<li>❌ ${epi.toUpperCase()}</li>`).join('')}
+            </ul>
+        `;
+    }
+    
+    // Adicionar ao histórico e estatísticas
+    addToHistory(data, detectedEPIs, missingEPIs);
     updateStatsDisplay();
     updateHistoryDisplay();
 }
@@ -714,9 +785,10 @@ function updateStats(entry) {
 
 // ========== FUNÇÕES DE BOUNDING BOXES ==========
 function drawBoundingBoxes(predictions, videoElement) {
-    clearVideoOverlay();
-    
-    if (!predictions || predictions.length === 0) return;
+    if (!predictions || predictions.length === 0) {
+        clearVideoOverlay();
+        return;
+    }
     
     const overlay = document.getElementById('videoOverlay');
     if (!overlay) return;
@@ -725,6 +797,12 @@ function drawBoundingBoxes(predictions, videoElement) {
     if (overlay.width !== videoElement.videoWidth || overlay.height !== videoElement.videoHeight) {
         overlay.width = videoElement.videoWidth;
         overlay.height = videoElement.videoHeight;
+    }
+    
+    // No modo contínuo, mostrar overlay sobre o vídeo
+    if (autoDetectInterval) {
+        overlay.style.display = 'block';
+        video.style.opacity = '1'; // Garantir que vídeo está visível
     }
     
     const ctx = overlay.getContext('2d');
@@ -768,12 +846,13 @@ function clearVideoOverlay() {
     if (overlay) {
         const ctx = overlay.getContext('2d');
         ctx.clearRect(0, 0, overlay.width, overlay.height);
-        // Se não estiver em modo congelado, ocultar overlay
-        if (!isImageFrozen) {
+        // Se não estiver em modo congelado E não estiver em modo contínuo, ocultar overlay
+        if (!isImageFrozen && !autoDetectInterval) {
             overlay.style.display = 'none';
             overlay.classList.remove('frozen');
             video.style.opacity = '1';
         }
+        // Em modo contínuo, manter overlay visível mas limpo
     }
 }
 
@@ -805,8 +884,16 @@ function stopAutoDetect() {
         clearInterval(autoDetectInterval);
         autoDetectInterval = null;
     }
+    // Garantir que o vídeo continue rodando ao parar detecção contínua
+    if (stream && video.paused) {
+        video.play();
+    }
+    isImageFrozen = false;
+    frozenImageData = null;
     // Garantir que o botão de captura manual esteja habilitado
     captureBtn.disabled = false;
+    // Limpar overlay ao parar
+    clearVideoOverlay();
 }
 
 // ========== FUNÇÕES DE COMPRESSÃO ==========
@@ -895,19 +982,28 @@ async function captureAndAnalyze(useMock = false) {
     try {
         let data;
         
-        // Se não estiver em modo contínuo, pausar o vídeo e congelar a imagem
+        // IMPORTANTE: No modo contínuo, NUNCA pausar o vídeo
+        // Apenas pausar no modo manual (captura única)
         if (!autoDetectInterval) {
             video.pause();
             isImageFrozen = true;
+        } else {
+            // Garantir que o vídeo continue rodando no modo contínuo
+            if (video.paused && stream) {
+                video.play();
+            }
+            isImageFrozen = false;
         }
         
         if (useMock) {
             // Usar dados mock para teste
             await new Promise(resolve => setTimeout(resolve, 500)); // Simular delay
             data = generateMockData();
-            // Para mock, criar uma imagem simulada
+                // Para mock, criar uma imagem simulada (apenas no modo manual)
             if (!autoDetectInterval) {
                 frozenImageData = createMockFrozenImage();
+            } else {
+                frozenImageData = null;
             }
         } else {
             // Capturar frame do vídeo
@@ -916,13 +1012,16 @@ async function captureAndAnalyze(useMock = false) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0);
             
-            // Salvar a imagem capturada para exibição congelada
+            // Salvar a imagem capturada para exibição congelada (apenas no modo manual)
             if (!autoDetectInterval) {
                 frozenImageData = {
                     width: canvas.width,
                     height: canvas.height,
                     imageData: canvas.toDataURL('image/jpeg', 1.0)
                 };
+            } else {
+                // No modo contínuo, limpar dados de imagem congelada
+                frozenImageData = null;
             }
             
             // Converter e comprimir para API
@@ -951,6 +1050,11 @@ async function captureAndAnalyze(useMock = false) {
         if (!autoDetectInterval && resumeBtn) {
             resumeBtn.style.display = 'inline-block';
             captureBtn.textContent = 'Nova Captura';
+        }
+        
+        // Garantir que o vídeo continue rodando no modo contínuo
+        if (autoDetectInterval && video.paused && stream) {
+            video.play();
         }
         
     } catch (error) {
